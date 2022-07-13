@@ -21,3 +21,47 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+
+# Miscellaneous
+*.java.hsp
+*.sonarj
+*.sw*
+.DS_Store
+build.sh
+integration-repo
+ivy-cache
+argfile*
+activemq-data/
+classes/
+
+# Gradle artifacts
+.gradle
+.gradletasknamecache
+/build
+buildSrc/build
+/bootcamp-*/build
+
+# Maven artifacts
+pom.xml
+target/
+
+# Eclipse artifacts, including WTP generated manifests
+bin
+.classpath
+.project
+.settings
+.springBeans
+bootcamp-*/src/main/java/META-INF/MANIFEST.MF
+
+# IDEA artifacts and output dirs
+*.iml
+*.ipr
+*.iws
+.idea
+out
+test-output
+atlassian-ide-plugin.xml
+
+# VS Code
+.vscode/
