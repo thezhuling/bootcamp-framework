@@ -10,9 +10,7 @@
     <description>bootcamp-framework</description>
     <packaging>pom</packaging>
 
-    <modules>
-        <module>bootcamp-framework-gateway</module>
-    </modules>
+    <modules></modules>
 
     <properties>
         <encoding>UTF-8</encoding>
