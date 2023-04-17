@@ -24,6 +24,7 @@
 
     <modules>
         <module>bootcamp-framework-gateway</module>
+        <module>bootcamp-framework-microservice</module>
     </modules>
 
     <dependencyManagement>
