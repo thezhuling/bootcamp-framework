@@ -44,5 +44,11 @@
             <artifactId>spring-restdocs-webtestclient</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!--   Using Spring Cloud CircuitBreaker -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+        </dependency>
     </dependencies>
 </project>
