@@ -1,5 +1,6 @@
 package org.github.bootcamp.microservice;
 
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
@@ -10,15 +11,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RefreshScope
+@Data
 public class NacosConfiguration {
     @Value("${microservice.ttl}")
     private String ttl;
-
-    public String getTtl() {
-        return ttl;
-    }
-
-    public void setTtl(String ttl) {
-        this.ttl = ttl;
-    }
 }
