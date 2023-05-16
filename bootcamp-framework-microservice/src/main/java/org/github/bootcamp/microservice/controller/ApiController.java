@@ -24,6 +24,7 @@ public class ApiController {
         nacosConfiguration.getTtl(),
         nacosConfiguration.getAppKey(),
         nacosConfiguration.getSecret());
+    log.info("test-sl4j and git commit");
     return ResponseEntity.ok("success");
   }
 }
