@@ -5,7 +5,7 @@ spring:
     nacos:
       discovery:
         namespace: afc167d9-0f3d-45f3-ba28-ebf06d22b430
-        register-enabled: true
+        service: ${spring.application.name}
       config:
         namespace: afc167d9-0f3d-45f3-ba28-ebf06d22b430
         prefix: ${spring.application.name}
