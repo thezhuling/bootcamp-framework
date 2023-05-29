@@ -9,12 +9,8 @@
         <version>0.0.1</version>
     </parent>
 
-    <artifactId>bootcamp-framework-toolkit</artifactId>
-
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
+    <artifactId>bootcamp-framework-dto</artifactId>
+    <name>bootcamp-framework-dto</name>
+    <description>bootcamp-framework-dto</description>
+    <packaging>jar</packaging>
 </project>
