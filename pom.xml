@@ -22,6 +22,7 @@
         <spring-cloud-alibaba.version>2022.0.0.0-RC2</spring-cloud-alibaba.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <bootcamp-framework.version>0.0.1</bootcamp-framework.version>
+        <rocketmq-spring-boot.version>2.2.3</rocketmq-spring-boot.version>
     </properties>
 
     <modules>
@@ -62,6 +63,18 @@
                 <groupId>org.github.bootcamp</groupId>
                 <artifactId>bootcamp-framework-dto</artifactId>
                 <version>${bootcamp-framework.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.github.bootcamp</groupId>
+                <artifactId>bootcamp-framework-toolkit</artifactId>
+                <version>0.0.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-spring-boot-starter</artifactId>
+                <version>${rocketmq-spring-boot.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -105,7 +118,6 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot.version}</version>
                     <configuration>
                         <excludes>
                             <exclude>
@@ -114,14 +126,6 @@
                             </exclude>
                         </excludes>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <id>repackage</id>
-                            <goals>
-                                <goal>repackage</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
 
                 <plugin>

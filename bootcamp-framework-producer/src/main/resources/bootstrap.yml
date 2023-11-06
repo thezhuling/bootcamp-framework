@@ -25,4 +25,10 @@ management:
       exposure:
         include: "health, info, shutdown, prometheus"
 
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    group: ${spring.application.name}
+    customized-trace-topic: bootcamp-producer
+    send-message-timeout: 10000
 
