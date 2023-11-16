@@ -1,4 +1,4 @@
-package org.github.bootcamp.microservice.request.wrapper;
+package org.github.bootcamp.microservice.wrapper;
 
 import com.alibaba.nacos.common.utils.CollectionUtils;
 import jakarta.servlet.ReadListener;

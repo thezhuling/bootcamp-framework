@@ -1,4 +1,4 @@
-package org.github.bootcamp.microservice.request.filter;
+package org.github.bootcamp.microservice.filter;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -6,19 +6,16 @@ import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import org.github.bootcamp.microservice.request.wrapper.HttpRequestWrapper;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
+import org.github.bootcamp.microservice.wrapper.HttpRequestWrapper;
 
 /**
  * @author zhuling
  */
-//@Component
-//@WebFilter(filterName = "ContentCachingRequestFilter", urlPatterns = "/**")
-//@Order(10)
+// @Component
+// @WebFilter(filterName = "ContentCachingRequestFilter", urlPatterns = "/**")
+// @Order(10)
 public class ContentCachingRequestFilter implements Filter {
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {

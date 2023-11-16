@@ -1,4 +1,4 @@
-package org.github.bootcamp.microservice;
+package org.github.bootcamp.microservice.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;

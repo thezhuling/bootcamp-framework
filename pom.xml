@@ -17,12 +17,13 @@
         <maven.compiler.target>17</maven.compiler.target>
         <maven.plugin.version>3.11.0</maven.plugin.version>
 
-        <spring-boot.version>3.0.5</spring-boot.version>
-        <spring-cloud.version>2022.0.2</spring-cloud.version>
-        <spring-cloud-alibaba.version>2022.0.0.0-RC2</spring-cloud-alibaba.version>
+        <spring-boot.version>3.0.12</spring-boot.version>
+        <spring-cloud.version>2022.0.4</spring-cloud.version>
+        <spring-cloud-alibaba.version>2022.0.0.0</spring-cloud-alibaba.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <bootcamp-framework.version>0.0.1</bootcamp-framework.version>
         <rocketmq-spring-boot.version>2.2.3</rocketmq-spring-boot.version>
+        <redis-om-spring.version>0.8.7</redis-om-spring.version>
     </properties>
 
     <modules>
@@ -68,13 +69,19 @@
             <dependency>
                 <groupId>org.github.bootcamp</groupId>
                 <artifactId>bootcamp-framework-toolkit</artifactId>
-                <version>0.0.1</version>
+                <version>${bootcamp-framework.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.rocketmq</groupId>
                 <artifactId>rocketmq-spring-boot-starter</artifactId>
                 <version>${rocketmq-spring-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.redis.om</groupId>
+                <artifactId>redis-om-spring</artifactId>
+                <version>${redis-om-spring.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -111,6 +118,13 @@
             </exclusions>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>snapshots-repo</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
 
     <build>
         <pluginManagement>

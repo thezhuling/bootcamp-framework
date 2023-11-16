@@ -1,4 +1,4 @@
-package org.github.bootcamp.microservice.request.wrapper;
+package org.github.bootcamp.microservice.wrapper;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;

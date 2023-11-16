@@ -10,6 +10,10 @@ spring:
         namespace: afc167d9-0f3d-45f3-ba28-ebf06d22b430
         prefix: ${spring.application.name}
         file-extension: yml
+        shared-configs:
+          - data-id: application-redis.yml
+            group: BOOTCAMP-COMMON
+            refresh: true
       username: nacos
       password: nacos
       server-addr: 39.96.38.111:8848
@@ -26,7 +30,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health, info, shutdown, prometheus"
+        include: "health, info, shutdown"
 feign:
   sentinel:
     enabled: true
+
+
+

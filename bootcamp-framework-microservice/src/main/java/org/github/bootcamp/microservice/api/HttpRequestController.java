@@ -1,4 +1,4 @@
-package org.github.bootcamp.microservice.controller;
+package org.github.bootcamp.microservice.api;
 
 import lombok.extern.slf4j.Slf4j;
 import org.github.bootcamp.dto.UserDto;

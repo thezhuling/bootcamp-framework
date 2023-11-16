@@ -1,4 +1,4 @@
-package org.github.bootcamp.microservice.request.interceptor;
+package org.github.bootcamp.microservice.interceptor;
 
 import com.alibaba.nacos.shaded.com.google.common.base.Stopwatch;
 import jakarta.annotation.Nonnull;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.github.bootcamp.dto.RequestTraceLogDto;
-import org.github.bootcamp.microservice.request.wrapper.HttpRequestWrapper;
+import org.github.bootcamp.microservice.wrapper.HttpRequestWrapper;
 import org.github.bootcamp.tooltik.DateUtil;
 import org.github.bootcamp.tooltik.HttpUtil;
 import org.github.bootcamp.tooltik.JsonUtil;

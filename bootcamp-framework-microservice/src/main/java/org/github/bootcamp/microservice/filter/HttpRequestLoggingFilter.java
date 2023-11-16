@@ -1,11 +1,10 @@
-package org.github.bootcamp.microservice.request.filter;
+package org.github.bootcamp.microservice.filter;
 
 import com.alibaba.nacos.shaded.com.google.common.base.Stopwatch;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.github.bootcamp.dto.RequestTraceLogDto;
-import org.github.bootcamp.microservice.request.wrapper.HttpRequestWrapper;
+import org.github.bootcamp.microservice.wrapper.HttpRequestWrapper;
 import org.github.bootcamp.tooltik.DateUtil;
 import org.github.bootcamp.tooltik.HttpUtil;
 import org.github.bootcamp.tooltik.JsonUtil;
@@ -30,9 +29,7 @@ import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -45,11 +42,11 @@ import org.springframework.web.util.WebUtils;
 /**
  * @author zhuling
  */
-@Component
-@WebFilter(filterName = "LoggingFilter", urlPatterns = "/**")
-@Order(10)
+//@Component
+//@WebFilter(filterName = "HttpRequestLoggingFilter", urlPatterns = "/**")
+//@Order(10)
 @Slf4j
-public class LoggingFilter extends OncePerRequestFilter
+public class HttpRequestLoggingFilter extends OncePerRequestFilter
     implements ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
   private static final List<String> DEFAULT_DOWNLOAD_CONTENT_TYPE =
       List.of(
@@ -137,7 +134,9 @@ public class LoggingFilter extends OncePerRequestFilter
         return (HandlerMethod) handlerExecutionChain.getHandler();
       }
     } catch (Exception e) {
-      log.error("[LoggingFilter:getHandlerMethod], error: {}", ExceptionUtils.getStackTrace(e));
+      log.error(
+          "[HttpRequestLoggingFilter:getHandlerMethod], error: {}",
+          ExceptionUtils.getStackTrace(e));
     }
     return null;
   }
@@ -200,7 +199,8 @@ public class LoggingFilter extends OncePerRequestFilter
       try {
         wrapper.copyBodyToResponse();
       } catch (IOException e) {
-        log.error("LoggingFilter copyResponse exception:{}", ExceptionUtils.getStackTrace(e));
+        log.error(
+            "HttpRequestLoggingFilter copyResponse exception:{}", ExceptionUtils.getStackTrace(e));
       }
     }
   }
@@ -251,7 +251,9 @@ public class LoggingFilter extends OncePerRequestFilter
       // TODO urlTemplate处理
 
     } catch (Exception e) {
-      log.error("LoggingFilter buildRequestPayload exception:{}", ExceptionUtils.getStackTrace(e));
+      log.error(
+          "HttpRequestLoggingFilter buildRequestPayload exception:{}",
+          ExceptionUtils.getStackTrace(e));
     }
 
     return StringUtils.EMPTY;
