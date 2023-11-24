@@ -7,5 +7,5 @@ import org.springframework.context.annotation.Configuration;
  * @author zhuling
  */
 @Configuration
-@EnableRedisDocumentRepositories
+@EnableRedisDocumentRepositories(basePackages = "org.github.bootcamp.microservice.redisom.*")
 public class RedisDocumentConfiguration {}

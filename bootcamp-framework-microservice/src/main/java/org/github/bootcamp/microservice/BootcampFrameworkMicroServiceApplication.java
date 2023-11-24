@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 public class BootcampFrameworkMicroServiceApplication {
+
   public static void main(String[] args) {
     SpringApplication.run(BootcampFrameworkMicroServiceApplication.class, args);
   }
