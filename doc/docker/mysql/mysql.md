@@ -1,23 +1,28 @@
-# mysql-server-build for docker
+# mysql-server build for docker
 
 ## step
 
 #### pull image
+
 ```` shell
 docker pull mysql
 ````
 
 #### build container
+
 ```` shell
 mkdir -p /var/local/mysql/data/
 mkdir -p /var/local/mysql/logs/
 mkdir -p /var/local/mysql/conf/
 vi /var/local/mysql/conf/my.cnf
 ````
+
 #### build my.cnf
+
 see more detail for https://hub.docker.com/_/mysql
 
 #### docker run
+
 ```` shell
 docker run -d \ 
 --name mysql-server \
