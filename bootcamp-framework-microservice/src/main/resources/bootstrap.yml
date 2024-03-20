@@ -4,19 +4,21 @@ spring:
   cloud:
     nacos:
       discovery:
-        namespace: afc167d9-0f3d-45f3-ba28-ebf06d22b430
+        namespace: 9c4ed72d4c450cb98d2b35b75b9d343b
         service: ${spring.application.name}
+        group: BOOTCAMP
       config:
-        namespace: afc167d9-0f3d-45f3-ba28-ebf06d22b430
+        namespace: 9c4ed72d4c450cb98d2b35b75b9d343b
         prefix: ${spring.application.name}
         file-extension: yml
         shared-configs:
           - data-id: application-redis.yml
             group: BOOTCAMP-COMMON
             refresh: true
+        group: BOOTCAMP
       username: nacos
       password: nacos
-      server-addr: 39.96.38.111:8848
+      server-addr: 127.0.0.1:8848
     loadbalancer:
       nacos:
         enabled: true
