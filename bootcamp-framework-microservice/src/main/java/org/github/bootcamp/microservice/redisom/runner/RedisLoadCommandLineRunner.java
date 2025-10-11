@@ -39,15 +39,15 @@ public class RedisLoadCommandLineRunner implements CommandLineRunner {
   @Override
   public void run(String... args) throws Exception {
     // save companies to the database
-    companyRepository.deleteAll();
-    companyRepository.saveAll(initializationCompany());
+    //    companyRepository.deleteAll();
+    //    companyRepository.saveAll(initializationCompany());
     // save person to the database
-    personRepository.deleteAll();
-    personRepository.saveAll(initializationPerson());
+    //    personRepository.deleteAll();
+    //    personRepository.saveAll(initializationPerson());
 
     // save permit to the database
-    permitRepository.deleteAll();
-    permitRepository.saveAll(initializationPermit());
+    //    permitRepository.deleteAll();
+    //    permitRepository.saveAll(initializationPermit());
 
     // save airport to the database
     //    airportsRepository.deleteAll();

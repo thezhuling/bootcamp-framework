@@ -26,7 +26,7 @@ public class Company {
   @TextIndexed @Searchable private String name;
   private String url;
   @Indexed private Point location;
-  @Indexed private Set<String> tags = new HashSet<>();
+  @Builder.Default @Indexed private Set<String> tags = new HashSet<>();
   @Indexed private Integer numberOfEmployees;
   @Indexed private Integer yearFounded;
   private boolean publiclyListed;
