@@ -1,24 +1,21 @@
 spring:
   application:
     name: bootcamp-framework-microservice
+  config:
+    import:
+      - optional:nacos:application-redis.yml?group=BOOTCAMP-COMMON&refresh=true
+      - optional:nacos:${spring.application.name}.yml?group=BOOTCAMP&refresh=true
   cloud:
     nacos:
+      server-addr: 127.0.0.1:8848
+      username: nacos
+      password: nacos
       discovery:
         namespace: 26b5909e-699a-419a-8ea8-2655c63009a3
         service: ${spring.application.name}
         group: BOOTCAMP
       config:
         namespace: 26b5909e-699a-419a-8ea8-2655c63009a3
-        prefix: ${spring.application.name}
-        file-extension: yml
-        shared-configs:
-          - data-id: application-redis.yml
-            group: BOOTCAMP-COMMON
-            refresh: true
-        group: BOOTCAMP
-      username: nacos
-      password: nacos
-      server-addr: 127.0.0.1:8848
     loadbalancer:
       nacos:
         enabled: true
@@ -40,7 +37,6 @@ feign:
 rocketmq:
   name-server: 127.0.0.1:9876
   producer:
-    group: bootcamp-framework-microservice
+    group: ${spring.application.name}
     customized-trace-topic: bootcamp-producer
     send-message-timeout: 10000
-

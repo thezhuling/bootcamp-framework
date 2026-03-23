@@ -1,20 +1,20 @@
 spring:
   application:
     name: bootcamp-framework-producer
+  config:
+    import:
+      - optional:nacos:${spring.application.name}.yml?group=BOOTCAMP&refresh=true
   cloud:
     nacos:
+      server-addr: 127.0.0.1:8848
+      username: nacos
+      password: nacos
       discovery:
         namespace: 9c4ed72d4c450cb98d2b35b75b9d343b
         service: ${spring.application.name}
         group: BOOTCAMP
       config:
         namespace: 9c4ed72d4c450cb98d2b35b75b9d343b
-        prefix: ${spring.application.name}
-        file-extension: yml
-        group: BOOTCAMP
-      username: nacos
-      password: nacos
-      server-addr: 127.0.0.1:8848
     loadbalancer:
       nacos:
         enabled: true
@@ -31,9 +31,8 @@ management:
         include: "health, info, shutdown, prometheus"
 
 rocketmq:
-  name-server: localhost:9876
+  name-server: 127.0.0.1:9876
   producer:
     group: ${spring.application.name}
     customized-trace-topic: bootcamp-producer
     send-message-timeout: 10000
-

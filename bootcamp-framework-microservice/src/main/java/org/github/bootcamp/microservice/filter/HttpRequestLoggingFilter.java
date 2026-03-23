@@ -25,7 +25,7 @@ import org.github.bootcamp.tooltik.HttpUtil;
 import org.github.bootcamp.tooltik.JsonUtil;
 import org.github.bootcamp.tooltik.StringUtils;
 import org.springframework.beans.BeansException;
-import org.springframework.boot.web.context.WebServerInitializedEvent;
+import org.springframework.boot.web.server.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
