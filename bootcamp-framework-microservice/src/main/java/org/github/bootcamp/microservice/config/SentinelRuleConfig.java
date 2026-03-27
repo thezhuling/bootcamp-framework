@@ -19,8 +19,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SentinelRuleConfig {
 
-    // Java 15+ text block — human-readable inline JSON for Sentinel rules
-    private static final String FLOW_RULES_JSON = """
+  // Java 15+ text block — human-readable inline JSON for Sentinel rules
+  private static final String FLOW_RULES_JSON =
+      """
         [
           {
             "resource": "/api/v1/news/trending",
@@ -41,18 +42,18 @@ public class SentinelRuleConfig {
         ]
         """;
 
-    @PostConstruct
-    public void initFlowRules() {
-        try {
-            var mapper = new ObjectMapper();
-            List<FlowRule> rules = mapper.readValue(
-                FLOW_RULES_JSON, new TypeReference<List<FlowRule>>() {});
-            // Ensure grade constants are set correctly
-            rules.forEach(rule -> rule.setGrade(RuleConstant.FLOW_GRADE_QPS));
-            FlowRuleManager.loadRules(rules);
-            log.info("Sentinel flow rules loaded: {} rules", rules.size());
-        } catch (Exception e) {
-            log.error("Failed to load Sentinel flow rules", e);
-        }
+  @PostConstruct
+  public void initFlowRules() {
+    try {
+      var mapper = new ObjectMapper();
+      List<FlowRule> rules =
+          mapper.readValue(FLOW_RULES_JSON, new TypeReference<List<FlowRule>>() {});
+      // Ensure grade constants are set correctly
+      rules.forEach(rule -> rule.setGrade(RuleConstant.FLOW_GRADE_QPS));
+      FlowRuleManager.loadRules(rules);
+      log.info("Sentinel flow rules loaded: {} rules", rules.size());
+    } catch (Exception e) {
+      log.error("Failed to load Sentinel flow rules", e);
     }
+  }
 }

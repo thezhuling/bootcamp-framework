@@ -6,5 +6,5 @@ import org.github.bootcamp.dto.UserDto;
  * @author zhuling
  */
 public interface MnsService {
-    void sendMessage(UserDto userDto);
+  void sendMessage(UserDto userDto);
 }
