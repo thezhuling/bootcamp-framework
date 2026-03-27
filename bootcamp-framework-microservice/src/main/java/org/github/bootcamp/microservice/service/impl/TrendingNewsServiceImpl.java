@@ -20,7 +20,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.StructuredTaskScope;
 import java.util.regex.Pattern;
+import java.util.stream.Gatherers;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -69,10 +71,9 @@ public class TrendingNewsServiceImpl implements TrendingNewsService {
       return latestStories;
     }
 
-    List<FeedStory> feedStories = new ArrayList<>();
-    for (String feedUrl : trendingNewsProperties.getFeedUrls()) {
-      feedStories.addAll(fetchFeedStories(feedUrl));
-    }
+    // Java 25 preview: StructuredTaskScope for parallel feed fetching
+    // Total time = max(individual fetch times) instead of sum
+    List<FeedStory> feedStories = fetchAllFeedsParallel(trendingNewsProperties.getFeedUrls());
 
     latestStories = rankStories(feedStories);
     lastUpdatedAt = Instant.now();
@@ -81,6 +82,42 @@ public class TrendingNewsServiceImpl implements TrendingNewsService {
         latestStories.size(),
         trendingNewsProperties.getFeedUrls().size());
     return latestStories;
+  }
+
+  /**
+   * Fetches all RSS feeds in parallel using Java 25 Structured Concurrency (JEP 505 preview).
+   * JEP 505 replaced ShutdownOnFailure with StructuredTaskScope.open(Joiner) factory API.
+   * Falls back to sequential on interruption or scope failure.
+   */
+  @SuppressWarnings("preview")
+  private List<FeedStory> fetchAllFeedsParallel(List<String> feedUrls) {
+    // Java 25: explicit Joiner type to satisfy open()'s two-param signature <T, R>
+    StructuredTaskScope.Joiner<List<FeedStory>, ?> joiner =
+        StructuredTaskScope.Joiner.allSuccessfulOrThrow();
+    try (var scope = StructuredTaskScope.open(joiner)) {
+      List<StructuredTaskScope.Subtask<List<FeedStory>>> tasks = feedUrls.stream()
+          .map(url -> scope.fork(() -> fetchFeedStories(url)))
+          .toList();
+      scope.join();
+      return tasks.stream()
+          .flatMap(t -> t.get().stream())
+          .toList();
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      log.warn("Feed fetch interrupted, falling back to sequential");
+      return fetchAllFeedsSequential(feedUrls);
+    } catch (Exception e) {
+      log.warn("Parallel fetch failed, falling back to sequential", e);
+      return fetchAllFeedsSequential(feedUrls);
+    }
+  }
+
+  private List<FeedStory> fetchAllFeedsSequential(List<String> feedUrls) {
+    List<FeedStory> result = new ArrayList<>();
+    for (String url : feedUrls) {
+      result.addAll(fetchFeedStories(url));
+    }
+    return result;
   }
 
   @Override
@@ -101,7 +138,9 @@ public class TrendingNewsServiceImpl implements TrendingNewsService {
       groupedStories.computeIfAbsent(normalizedTitle, key -> new ArrayList<>()).add(story);
     }
 
-    return groupedStories.values().stream()
+    // Java 22+ stable: Stream Gatherers — window stories for batch processing
+    // Use windowSliding to inspect clusters of ranked stories
+    var ranked = groupedStories.values().stream()
         .map(this::toTrendingNewsStory)
         .sorted(
             Comparator.comparingInt(TrendingNewsStory::mentionCount)
@@ -110,8 +149,22 @@ public class TrendingNewsServiceImpl implements TrendingNewsService {
                     story -> Optional.ofNullable(story.publishedAt()).orElse(Instant.EPOCH),
                     Comparator.reverseOrder())
                 .thenComparing(TrendingNewsStory::title, String.CASE_INSENSITIVE_ORDER))
+        .toList();
+
+    // Demonstrate Gatherers.windowSliding for deduplication across adjacent stories
+    var deduped = ranked.stream()
+        .gather(Gatherers.windowSliding(2))
+        .filter(window -> window.size() < 2
+            || !normalizeTitle(window.get(0).title())
+                .equals(normalizeTitle(window.getLast().title())))
+        .map(List::getFirst)
+        .distinct()
         .limit(Math.max(trendingNewsProperties.getMaxStories(), 1))
         .toList();
+
+    return deduped.isEmpty() ? ranked.stream()
+        .limit(Math.max(trendingNewsProperties.getMaxStories(), 1))
+        .toList() : deduped;
   }
 
   String normalizeTitle(String title) {

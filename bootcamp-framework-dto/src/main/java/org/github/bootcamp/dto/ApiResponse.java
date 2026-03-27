@@ -1,18 +1,36 @@
 package org.github.bootcamp.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import org.github.bootcamp.dto.enums.RespStatus;
 
-@Getter
-@Setter
-@ToString
-@AllArgsConstructor
-public class ApiResponse<T> {
-  private Integer status;
+/**
+ * Unified API response type using Java sealed interface + record implementations.
+ * Callers use pattern matching switch to handle Success and Failure cases.
+ *
+ * <pre>{@code
+ * return switch (response) {
+ *     case ApiResponse.Success<T> s -> ResponseEntity.ok(s.data());
+ *     case ApiResponse.Failure<T> f -> ResponseEntity.status(f.code()).body(f);
+ * };
+ * }</pre>
+ *
+ * @author zhuling
+ */
+public sealed interface ApiResponse<T>
+    permits ApiResponse.Success, ApiResponse.Failure {
 
-  private String message;
+    record Success<T>(T data) implements ApiResponse<T> {}
 
-  private T data;
+    record Failure<T>(int code, String message) implements ApiResponse<T> {}
+
+    static <T> ApiResponse<T> ok(T data) {
+        return new Success<>(data);
+    }
+
+    static <T> ApiResponse<T> fail(RespStatus status) {
+        return new Failure<>(status.getValue(), status.getDesc());
+    }
+
+    static <T> ApiResponse<T> fail(int code, String message) {
+        return new Failure<>(code, message);
+    }
 }

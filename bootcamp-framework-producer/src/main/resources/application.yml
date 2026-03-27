@@ -1,9 +1,12 @@
 spring:
   application:
     name: bootcamp-framework-producer
+  threads:
+    virtual:
+      enabled: true
   config:
     import:
-      - optional:nacos:${spring.application.name}.yml?group=BOOTCAMP&refresh=true
+      - optional:nacos:${spring.application.name}.yml?group=BOOTCAMP&refreshEnabled=true
   cloud:
     nacos:
       server-addr: 127.0.0.1:8848
@@ -15,12 +18,21 @@ spring:
         group: BOOTCAMP
       config:
         namespace: 9c4ed72d4c450cb98d2b35b75b9d343b
+        group: BOOTCAMP
+        file-extension: yml
     loadbalancer:
       nacos:
         enabled: true
     openfeign:
       circuitbreaker:
         enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000
+          jwk-set-uri: http://localhost:9000/oauth2/jwks
+
 management:
   endpoint:
     shutdown:
@@ -28,7 +40,16 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health, info, shutdown, prometheus"
+        include: "health,info,shutdown,prometheus,metrics,traces"
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 rocketmq:
   name-server: 127.0.0.1:9876

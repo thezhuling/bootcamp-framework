@@ -1,32 +1,27 @@
 server:
-  port: 8080
+  port: 8082
 
 spring:
   application:
-    name: bootcamp-framework-gateway
+    name: bootcamp-framework-ai
   threads:
     virtual:
       enabled: true
   config:
     import:
-      - optional:nacos:bootcamp-framework-gateway.yml?group=BOOTCAMP&refreshEnabled=true
+      - optional:nacos:bootcamp-framework-ai.yml?group=BOOTCAMP&refreshEnabled=true
   cloud:
     nacos:
       server-addr: 127.0.0.1:8848
       username: nacos
       password: nacos
       discovery:
-        namespace: <gateway-nacos-namespace-uuid>
+        namespace: <ai-nacos-namespace-uuid>
         group: BOOTCAMP
       config:
-        namespace: <gateway-nacos-namespace-uuid>
+        namespace: <ai-nacos-namespace-uuid>
         group: BOOTCAMP
         file-extension: yml
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
     sentinel:
       transport:
         dashboard: 127.0.0.1:8858
@@ -40,6 +35,20 @@ spring:
         jwt:
           issuer-uri: http://localhost:9000
           jwk-set-uri: http://localhost:9000/oauth2/jwks
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:your-api-key-here}
+      chat:
+        options:
+          model: gpt-4o-mini
+      embedding:
+        options:
+          model: text-embedding-3-small
+    vectorstore:
+      redis:
+        index: bootcamp-ai-index
+        prefix: "ai:"
+        initialize-schema: true
 
 management:
   endpoint:
@@ -48,7 +57,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info,shutdown,prometheus,metrics,gateway"
+        include: "health,info,shutdown,prometheus,metrics,traces"
   tracing:
     sampling:
       probability: 1.0

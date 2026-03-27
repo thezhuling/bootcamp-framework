@@ -1,10 +1,13 @@
 spring:
   application:
     name: bootcamp-framework-microservice
+  threads:
+    virtual:
+      enabled: true
   config:
     import:
-      - optional:nacos:application-redis.yml?group=BOOTCAMP-COMMON&refresh=true
-      - optional:nacos:${spring.application.name}.yml?group=BOOTCAMP&refresh=true
+      - optional:nacos:application-redis.yml?group=BOOTCAMP-COMMON&refreshEnabled=true
+      - optional:nacos:${spring.application.name}.yml?group=BOOTCAMP&refreshEnabled=true
   cloud:
     nacos:
       server-addr: 127.0.0.1:8848
@@ -16,12 +19,21 @@ spring:
         group: BOOTCAMP
       config:
         namespace: 26b5909e-699a-419a-8ea8-2655c63009a3
+        group: BOOTCAMP
+        file-extension: yml
     loadbalancer:
       nacos:
         enabled: true
     openfeign:
       circuitbreaker:
         enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000
+          jwk-set-uri: http://localhost:9000/oauth2/jwks
+
 management:
   endpoint:
     shutdown:
@@ -29,7 +41,17 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health, info, shutdown"
+        include: "health,info,shutdown,prometheus,metrics,traces"
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
 feign:
   sentinel:
     enabled: true

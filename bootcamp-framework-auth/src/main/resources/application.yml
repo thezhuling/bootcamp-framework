@@ -1,45 +1,31 @@
 server:
-  port: 8080
+  port: 9000
 
 spring:
   application:
-    name: bootcamp-framework-gateway
+    name: bootcamp-framework-auth
   threads:
     virtual:
       enabled: true
   config:
     import:
-      - optional:nacos:bootcamp-framework-gateway.yml?group=BOOTCAMP&refreshEnabled=true
+      - optional:nacos:bootcamp-framework-auth.yml?group=BOOTCAMP&refreshEnabled=true
   cloud:
     nacos:
       server-addr: 127.0.0.1:8848
       username: nacos
       password: nacos
       discovery:
-        namespace: <gateway-nacos-namespace-uuid>
+        namespace: <auth-nacos-namespace-uuid>
         group: BOOTCAMP
       config:
-        namespace: <gateway-nacos-namespace-uuid>
+        namespace: <auth-nacos-namespace-uuid>
         group: BOOTCAMP
         file-extension: yml
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-    sentinel:
-      transport:
-        dashboard: 127.0.0.1:8858
   data:
     redis:
       host: 127.0.0.1
       port: 6379
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:9000
-          jwk-set-uri: http://localhost:9000/oauth2/jwks
 
 management:
   endpoint:
@@ -48,7 +34,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info,shutdown,prometheus,metrics,gateway"
+        include: "health,info,shutdown,prometheus,metrics"
   tracing:
     sampling:
       probability: 1.0
