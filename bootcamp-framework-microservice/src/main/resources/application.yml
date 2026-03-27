@@ -62,14 +62,3 @@ rocketmq:
     group: ${spring.application.name}
     customized-trace-topic: bootcamp-producer
     send-message-timeout: 10000
-
-bootcamp:
-  news:
-    trending:
-      enabled: true
-      max-stories: 10
-      schedule-fixed-delay-millis: 1800000
-      request-timeout-millis: 10000
-      feed-urls:
-        - https://news.google.com/rss/headlines/section/topic/WORLD?hl=en-US&gl=US&ceid=US:en
-        - https://feeds.bbci.co.uk/news/world/rss.xml
