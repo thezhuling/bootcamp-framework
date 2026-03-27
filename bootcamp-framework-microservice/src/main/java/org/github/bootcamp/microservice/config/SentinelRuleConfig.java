@@ -46,8 +46,7 @@ public class SentinelRuleConfig {
   public void initFlowRules() {
     try {
       var mapper = new ObjectMapper();
-      List<FlowRule> rules =
-          mapper.readValue(FLOW_RULES_JSON, new TypeReference<List<FlowRule>>() {});
+      List<FlowRule> rules = mapper.readValue(FLOW_RULES_JSON, new TypeReference<>() {});
       // Ensure grade constants are set correctly
       rules.forEach(rule -> rule.setGrade(RuleConstant.FLOW_GRADE_QPS));
       FlowRuleManager.loadRules(rules);
