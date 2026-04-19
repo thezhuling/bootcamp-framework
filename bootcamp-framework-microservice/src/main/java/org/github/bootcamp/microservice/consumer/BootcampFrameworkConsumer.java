@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  *
  * @author zhuling
  */
-@Slf4j
+/*@Slf4j
 @Component
 @RocketMQMessageListener(
     topic = "bootcamp-framework-topic",
@@ -38,4 +38,4 @@ public class BootcampFrameworkConsumer implements RocketMQListener<String> {
             log.warn("Failed to parse message as MessageEvent, raw: {}", message, e);
         }
     }
-}
+}*/

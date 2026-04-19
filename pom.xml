@@ -124,6 +124,13 @@
                 <artifactId>opentelemetry-exporter-otlp</artifactId>
                 <version>${opentelemetry-exporter.version}</version>
             </dependency>
+
+            <!-- Override javassist to fix broken POM in 3.21.0-GA (pulled in by reflections via rocketmq-client) -->
+            <dependency>
+                <groupId>org.javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>3.30.2-GA</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

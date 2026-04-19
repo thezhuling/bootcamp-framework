@@ -123,6 +123,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>org.github.bootcamp.microservice.BootcampFrameworkMicroServiceApplication</mainClass>
+                    <jvmArguments>--enable-native-access=ALL-UNNAMED</jvmArguments>
                 </configuration>
                 <executions>
                     <execution>

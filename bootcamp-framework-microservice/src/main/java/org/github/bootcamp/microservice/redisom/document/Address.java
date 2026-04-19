@@ -8,8 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 @RequiredArgsConstructor(staticName = "of")
 public class Address {
-  @NonNull
-  private String city;
+  @NonNull private String city;
 
   @NonNull
   @Searchable(nostem = true)
