@@ -7,6 +7,7 @@ import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
 /**
  * API Gateway — routes traffic to downstream services via Nacos lb:// URIs.
@@ -50,8 +51,16 @@ public class BootcampFrameworkGatewayApplication {
             .build();
     }
 
-    /** General API rate limiter: 10 req/s, burst 20. */
+    /**
+     * General API rate limiter: 10 req/s, burst 20.
+     *
+     * <p>{@code @Primary} is required as of Spring Cloud Gateway 5.0.3: its
+     * {@code requestRateLimiterGatewayFilterFactory} autowires a single
+     * {@code RateLimiter}, and this application declares two. Each route still
+     * sets its own limiter explicitly, so this only supplies the autoconfiguration default.
+     */
     @Bean
+    @Primary
     public RedisRateLimiter apiRateLimiter() {
         return new RedisRateLimiter(10, 20);
     }
