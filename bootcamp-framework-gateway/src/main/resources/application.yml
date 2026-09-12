@@ -7,6 +7,15 @@ spring:
   threads:
     virtual:
       enabled: true
+  # Sentinel and Resilience4j both ship a ReactiveCircuitBreakerFactory. Sentinel's registers
+  # first, Resilience4j's backs off on @ConditionalOnMissingBean, and the gateway's
+  # .circuitBreaker() filter — which asks for ReactiveResilience4JCircuitBreakerFactory
+  # specifically — is then never registered, so the RouteLocator bean fails.
+  # Sentinel stays on for flow control and the dashboard; only its circuit breaker steps aside.
+  autoconfigure:
+    exclude:
+      - com.alibaba.cloud.circuitbreaker.sentinel.ReactiveSentinelCircuitBreakerAutoConfiguration
+      - com.alibaba.cloud.circuitbreaker.sentinel.SentinelCircuitBreakerAutoConfiguration
   config:
     import:
       - optional:nacos:bootcamp-framework-gateway.yml?group=BOOTCAMP&refreshEnabled=true

@@ -25,7 +25,9 @@ mvn test -Dtest=Chapter78ApplicationTests -pl bootcamp-framework-microservice
 mvn verify
 ```
 
-All modules compile with Java 25 `--enable-preview` (configured in root pom via `maven-compiler-plugin`). Tests require the same flag via `maven-surefire-plugin`.
+All modules compile with `maven.compiler.release=25`. No preview features are used, so no `--enable-preview` flag is needed anywhere — do not reintroduce it without an actual preview API to justify it.
+
+Each service module has a `*ApplicationContextTest` that refreshes the full Spring context with Nacos, Redis and RocketMQ switched off or mocked. These are the regression guard for framework upgrades — a moved autoconfiguration class or an ambiguous bean surfaces here rather than at deploy time. Keep them passing.
 
 ## Running Services Locally
 
@@ -95,6 +97,6 @@ Client → Gateway (WebFlux, JWT validation) → downstream services
 
 ## Docker Deployment
 
-- Microservice `Dockerfile` uses `azul/zulu-openjdk-alpine:17-latest`, exposes port 8080, JVM heap fixed at 256MB.
+- Microservice `Dockerfile` uses `azul/zulu-openjdk-alpine:25-jre`, exposes port 8080, JVM heap fixed at 256MB. The base image must stay on the same major as `maven.compiler.release`, and the image copies the repackaged jar, so `mvn package` has to have run the `repackage` goal (bound in the root pom).
 - Infrastructure docker-compose/setup scripts are in `doc/docker/` (nacos, redis-stack, mysql subdirectories).
 - Redis password and OpenAI API key: configured via Nacos / environment variables, not hardcoded.
