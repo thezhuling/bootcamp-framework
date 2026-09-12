@@ -65,10 +65,18 @@
             <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
         </dependency>
 
-        <!-- OAuth2 Resource Server (JWT validation + token relay) -->
+        <!-- OAuth2 Resource Server — inbound JWT validation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <!-- OAuth2 Client — required by the routes' tokenRelay() filter. Without it
+             TokenRelayGatewayFilterFactory is never registered and the RouteLocator bean
+             fails outright ("No TokenRelayGatewayFilterFactory bean was found"). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
 
         <!-- Observability -->
