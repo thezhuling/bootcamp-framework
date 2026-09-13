@@ -69,7 +69,7 @@ Spring Cloud and Boot versions are coupled: Spring Cloud's compatibility verifie
 - **Caching:** Redis via `redis-om-spring` (ORM-style annotations on entities).
 - **AI:** Spring AI 2.0.1 with OpenAI backend (`OPENAI_API_KEY` env var required). Redis Vector Store (reuses Redis Stack) for RAG. Chat, streaming, embedding, and RAG endpoints in `AiServiceImpl`.
 - **Inter-service calls:** Spring Cloud OpenFeign with Nacos load balancing.
-- **Circuit breaking:** Alibaba Sentinel + Resilience4j. The Gateway uses reactor-resilience4j for circuit breaking and excludes Sentinel's circuit breaker autoconfiguration in `application.yml` — with both present, Sentinel's factory wins and the gateway's `.circuitBreaker()` filter cannot be created. Sentinel still does flow control there. Sentinel dashboard at `:8858`.
+- **Circuit breaking:** Alibaba Sentinel + Resilience4j. The Gateway uses reactor-resilience4j for circuit breaking and excludes Sentinel's circuit breaker autoconfiguration in `application.yml` — with both present, Sentinel's factory wins and the gateway's `.circuitBreaker()` filter cannot be created. Sentinel still does flow control there. The gateway's breakers time out after `bootcamp.gateway.circuit-breaker.timeout` (default 5s, set in `GatewayCircuitBreakerConfig`); without it Resilience4j's 1s default silently sends slower healthy calls to `/fallback`. Sentinel dashboard at `:8858`.
 - **Virtual threads:** `spring.threads.virtual.enabled: true` in all services.
 - **Observability:** Micrometer + OTel tracing (OTLP export to `:4318`), Prometheus metrics at `/actuator/prometheus`.
 - **Gateway routing:** Defined as Java `@Bean RouteLocator` in `BootcampFrameworkGatewayApplication`, not in YAML.

@@ -2,15 +2,18 @@ package org.github.bootcamp.gateway;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import reactor.core.publisher.Mono;
 
 /**
  * Loads the gateway context without Nacos or Redis running, and asserts the route table is the one
@@ -29,7 +32,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
       "spring.cloud.nacos.config.enabled=false",
       "spring.cloud.service-registry.auto-registration.enabled=false",
       "spring.cloud.gateway.discovery.locator.enabled=false",
-      "spring.cloud.gateway.server.webflux.discovery.locator.enabled=false"
+      "spring.cloud.gateway.server.webflux.discovery.locator.enabled=false",
+      // short enough to keep the timeout tests quick, long enough to sit clear of the 1s default
+      "bootcamp.gateway.circuit-breaker.timeout=2s"
     })
 class GatewayApplicationContextTest {
 
@@ -38,6 +43,8 @@ class GatewayApplicationContextTest {
   @Autowired ApplicationContext context;
 
   @Autowired RouteLocator routeLocator;
+
+  @Autowired ReactiveResilience4JCircuitBreakerFactory circuitBreakerFactory;
 
   @Test
   void contextLoads() {
@@ -59,5 +66,30 @@ class GatewayApplicationContextTest {
         .containsExactlyInAnyOrder("apiRateLimiter", "aiRateLimiter");
     assertThat(context.getBean("apiRateLimiter", RedisRateLimiter.class))
         .isNotSameAs(context.getBean("aiRateLimiter", RedisRateLimiter.class));
+  }
+
+  @Test
+  void microserviceRouteToleratesCallsSlowerThanResilience4jsOneSecondDefault() {
+    // Resilience4j's own TimeLimiter default is 1s: without the gateway's customizer this
+    // 1.5s downstream call is cut off and the client gets the /fallback 503 instead.
+    assertThat(runThroughCircuitBreaker("microservice-cb", Duration.ofMillis(1500)))
+        .isEqualTo("completed");
+  }
+
+  @Test
+  void callsSlowerThanTheConfiguredTimeoutStillFallBack() {
+    // The limit is raised, not removed. A distinct breaker id also shows the setting is the
+    // factory default rather than something tied to the one route.
+    assertThat(runThroughCircuitBreaker("timeout-probe", Duration.ofSeconds(3)))
+        .isEqualTo("fallback:TimeoutException");
+  }
+
+  private String runThroughCircuitBreaker(String id, Duration downstreamLatency) {
+    return circuitBreakerFactory
+        .create(id)
+        .run(
+            Mono.delay(downstreamLatency).thenReturn("completed"),
+            t -> Mono.just("fallback:" + t.getClass().getSimpleName()))
+        .block();
   }
 }
