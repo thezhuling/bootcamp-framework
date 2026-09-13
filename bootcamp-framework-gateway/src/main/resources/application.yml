@@ -67,3 +67,12 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
+
+bootcamp:
+  gateway:
+    circuit-breaker:
+      # Time limit for calls behind a route's .circuitBreaker() filter (see
+      # GatewayCircuitBreakerConfig). Resilience4j's own default is 1s, which sends slower but
+      # healthy downstream calls to /fallback. Set it above the slowest route's real P99 latency.
+      # Read at startup; overriding it from Nacos needs a restart.
+      timeout: 5s
