@@ -19,7 +19,7 @@ mvn clean install -pl bootcamp-framework-ai -am
 mvn test
 
 # Run a single test class
-mvn test -Dtest=Chapter78ApplicationTests -pl bootcamp-framework-microservice
+mvn test -Dtest=GatewayApplicationContextTest -pl bootcamp-framework-gateway
 
 # Run integration tests
 mvn verify
@@ -45,7 +45,9 @@ OPENAI_API_KEY=<your-key> mvn spring-boot:run -pl bootcamp-framework-ai
 
 ## Architecture Overview
 
-This is a **Spring Boot 4.0.3 / Spring Cloud 2025.1.0 / Java 25** multi-module Maven project.
+This is a **Spring Boot 4.1.1 / Spring Cloud 2025.1.3 / Java 25** multi-module Maven project.
+
+Spring Cloud and Boot versions are coupled: Spring Cloud's compatibility verifier is on by default and fails startup on a mismatch. 2025.1.2 is the oldest train that accepts Boot 4.1.x. Keep `spring-cloud-dependencies` imported ahead of `spring-cloud-alibaba-dependencies` so `spring-cloud-commons` resolves from the newer train rather than SCA's older parent.
 
 ### Modules
 
@@ -65,9 +67,9 @@ This is a **Spring Boot 4.0.3 / Spring Cloud 2025.1.0 / Java 25** multi-module M
 - **Security:** Spring Authorization Server (`bootcamp-framework-auth`) issues JWTs. All downstream services are OAuth2 Resource Servers that validate tokens against the auth server's JWKS endpoint (`http://localhost:9000/oauth2/jwks`). The Gateway forwards tokens downstream via `TokenRelay` filter.
 - **Messaging:** Apache RocketMQ (`:9876`) — producer publishes, microservice consumes.
 - **Caching:** Redis via `redis-om-spring` (ORM-style annotations on entities).
-- **AI:** Spring AI 1.0.0 with OpenAI backend (`OPENAI_API_KEY` env var required). Redis Vector Store (reuses Redis Stack) for RAG. Chat, streaming, embedding, and RAG endpoints in `AiServiceImpl`.
+- **AI:** Spring AI 2.0.1 with OpenAI backend (`OPENAI_API_KEY` env var required). Redis Vector Store (reuses Redis Stack) for RAG. Chat, streaming, embedding, and RAG endpoints in `AiServiceImpl`.
 - **Inter-service calls:** Spring Cloud OpenFeign with Nacos load balancing.
-- **Circuit breaking:** Alibaba Sentinel + Resilience4j (Gateway uses reactor-resilience4j). Sentinel dashboard at `:8858`.
+- **Circuit breaking:** Alibaba Sentinel + Resilience4j. The Gateway uses reactor-resilience4j for circuit breaking and excludes Sentinel's circuit breaker autoconfiguration in `application.yml` — with both present, Sentinel's factory wins and the gateway's `.circuitBreaker()` filter cannot be created. Sentinel still does flow control there. Sentinel dashboard at `:8858`.
 - **Virtual threads:** `spring.threads.virtual.enabled: true` in all services.
 - **Observability:** Micrometer + OTel tracing (OTLP export to `:4318`), Prometheus metrics at `/actuator/prometheus`.
 - **Gateway routing:** Defined as Java `@Bean RouteLocator` in `BootcampFrameworkGatewayApplication`, not in YAML.
