@@ -22,8 +22,8 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 
 /**
- * Spring Authorization Server configuration for Spring Boot 4.0.3 / SAS 7.x.
- * Spring Boot auto-configures the security filter chains; we just declare the required beans.
+ * Authorization server beans: the registered client, the signing key and the issuer.
+ * The filter chains that expose the protocol endpoints are in {@link SecurityConfig}.
  *
  * @author zhuling
  */

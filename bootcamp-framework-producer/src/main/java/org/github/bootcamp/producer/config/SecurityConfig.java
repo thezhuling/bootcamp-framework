@@ -23,7 +23,11 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) {
     return http.authorizeHttpRequests(
-            auth -> auth.requestMatchers("/actuator/**").permitAll().anyRequest().authenticated())
+            auth ->
+                auth.requestMatchers("/actuator/health/**", "/actuator/info", "/actuator/prometheus")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(_ -> {}))
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .csrf(AbstractHttpConfigurer::disable)

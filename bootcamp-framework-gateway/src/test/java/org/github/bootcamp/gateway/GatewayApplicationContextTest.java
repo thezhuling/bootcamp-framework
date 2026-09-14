@@ -2,11 +2,18 @@ package org.github.bootcamp.gateway;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.context.ShutdownEndpoint;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
@@ -27,6 +34,7 @@ import reactor.core.publisher.Mono;
  */
 @SpringBootTest(
     classes = BootcampFrameworkGatewayApplication.class,
+    webEnvironment = WebEnvironment.RANDOM_PORT,
     properties = {
       "spring.cloud.nacos.discovery.enabled=false",
       "spring.cloud.nacos.config.enabled=false",
@@ -46,10 +54,28 @@ class GatewayApplicationContextTest {
 
   @Autowired ReactiveResilience4JCircuitBreakerFactory circuitBreakerFactory;
 
+  @Value("${local.server.port}")
+  int port;
+
   @Test
   void contextLoads() {
     assertThat(context).isNotNull();
     assertThat(context.getBeanDefinitionCount()).isPositive();
+  }
+
+  @Test
+  void shutdownEndpointIsNotExposed() throws Exception {
+    // An anonymous POST here used to stop the gateway: CSRF is off and /actuator/** was permitted.
+    assertThat(context.getBeanNamesForType(ShutdownEndpoint.class)).isEmpty();
+    assertThat(send("POST", "/actuator/shutdown")).isEqualTo(401);
+  }
+
+  @Test
+  void onlyProbeAndScrapeActuatorEndpointsAreAnonymous() throws Exception {
+    // Redis is not running here, so health may legitimately report DOWN (503)
+    assertThat(send("GET", "/actuator/health")).isIn(200, 503);
+    assertThat(send("GET", "/actuator/metrics")).isEqualTo(401);
+    assertThat(send("GET", "/actuator/gateway/routes")).isEqualTo(401);
   }
 
   @Test
@@ -82,6 +108,16 @@ class GatewayApplicationContextTest {
     // factory default rather than something tied to the one route.
     assertThat(runThroughCircuitBreaker("timeout-probe", Duration.ofSeconds(3)))
         .isEqualTo("fallback:TimeoutException");
+  }
+
+  private int send(String method, String path) throws Exception {
+    var request =
+        HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+            .method(method, HttpRequest.BodyPublishers.noBody())
+            .build();
+    return HttpClient.newHttpClient()
+        .send(request, HttpResponse.BodyHandlers.discarding())
+        .statusCode();
   }
 
   private String runThroughCircuitBreaker(String id, Duration downstreamLatency) {

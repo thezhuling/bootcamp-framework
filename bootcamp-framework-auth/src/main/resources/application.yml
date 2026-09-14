@@ -28,13 +28,10 @@ spring:
       port: 6379
 
 management:
-  endpoint:
-    shutdown:
-      enabled: true
   endpoints:
     web:
       exposure:
-        include: "health,info,shutdown,prometheus,metrics"
+        include: "health,info,prometheus,metrics"
   tracing:
     sampling:
       probability: 1.0

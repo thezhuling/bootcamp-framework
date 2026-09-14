@@ -34,13 +34,10 @@ spring:
           jwk-set-uri: http://localhost:9000/oauth2/jwks
 
 management:
-  endpoint:
-    shutdown:
-      enabled: true
   endpoints:
     web:
       exposure:
-        include: "health,info,shutdown,prometheus,metrics,traces"
+        include: "health,info,prometheus,metrics,traces"
   tracing:
     sampling:
       probability: 1.0
