@@ -97,6 +97,12 @@ Client → Gateway (WebFlux, JWT validation) → downstream services
 
 `bootcamp-framework-auth` uses Spring Authorization Server with an in-memory `RegisteredClient` (`bootcamp-client` / `bootcamp-secret`). RSA key pair is generated in memory on startup — **JWKs are not persisted**, so tokens issued before a restart become invalid. Supported flows: `client_credentials`, `authorization_code`, `refresh_token`.
 
+Both security filter chains live in `auth/config/SecurityConfig`: `@Order(1)` for the protocol endpoints, `@Order(2)` for form login. Boot's own authorization server chain backs off as soon as any `SecurityFilterChain` bean exists, so the `@Order(1)` chain must stay — without it `/oauth2/token`, `/oauth2/jwks` and `/.well-known/openid-configuration` all redirect to `/login` while the context still loads cleanly. `AuthApplicationContextTest` calls those endpoints over HTTP to guard this.
+
+### Actuator
+
+Every service permits only `/actuator/health/**`, `/actuator/info` and `/actuator/prometheus` anonymously; everything else under `/actuator` needs a token (or a login, on auth). `shutdown` is not exposed anywhere. The resource servers and the gateway run with CSRF disabled, so do not widen the anonymous matcher back to `/actuator/**` — with `shutdown` exposed that let a single anonymous POST stop the service. Each `*ApplicationContextTest` asserts this over HTTP.
+
 ## Docker Deployment
 
 - Microservice `Dockerfile` uses `azul/zulu-openjdk-alpine:25-jre`, exposes port 8080, JVM heap fixed at 256MB. The base image must stay on the same major as `maven.compiler.release`, and the image copies the repackaged jar, so `mvn package` has to have run the `repackage` goal (bound in the root pom).
