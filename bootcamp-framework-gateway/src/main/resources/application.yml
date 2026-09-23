@@ -39,10 +39,6 @@ spring:
     sentinel:
       transport:
         dashboard: 127.0.0.1:8858
-  data:
-    redis:
-      host: 127.0.0.1
-      port: 6379
   security:
     oauth2:
       resourceserver:

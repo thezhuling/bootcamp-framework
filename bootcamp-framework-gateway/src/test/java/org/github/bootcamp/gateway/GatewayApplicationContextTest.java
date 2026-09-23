@@ -16,19 +16,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Mono;
 
 /**
- * Loads the gateway context without Nacos or Redis running, and asserts the route table is the one
- * the application declares.
- *
- * <p>This is the test that would have caught the Spring Cloud Gateway 5.0.3 change behind the
- * {@code @Primary} on {@code apiRateLimiter}: two {@code RateLimiter} beans and a factory that
- * autowires exactly one makes the context fail to refresh.
+ * Loads the gateway context without Nacos running, and asserts the route table is the one the
+ * application declares.
  *
  * @author zhuling
  */
@@ -72,7 +67,6 @@ class GatewayApplicationContextTest {
 
   @Test
   void onlyProbeAndScrapeActuatorEndpointsAreAnonymous() throws Exception {
-    // Redis is not running here, so health may legitimately report DOWN (503)
     assertThat(send("GET", "/actuator/health")).isIn(200, 503);
     assertThat(send("GET", "/actuator/metrics")).isEqualTo(401);
     assertThat(send("GET", "/actuator/gateway/routes")).isEqualTo(401);
@@ -82,16 +76,6 @@ class GatewayApplicationContextTest {
   void declaresTheFourApplicationRoutes() {
     List<String> ids = routeLocator.getRoutes().map(r -> r.getId()).collectList().block();
     assertThat(ids).contains("microservice", "ai", "auth", "producer");
-  }
-
-  @Test
-  void bothRateLimitersRemainDistinctBeans() {
-    // @Primary only picks which limiter the autoconfiguration injects. It must not drop or
-    // collapse either bean — the AI route is deliberately throttled harder than the API route.
-    assertThat(context.getBeanNamesForType(RedisRateLimiter.class))
-        .containsExactlyInAnyOrder("apiRateLimiter", "aiRateLimiter");
-    assertThat(context.getBean("apiRateLimiter", RedisRateLimiter.class))
-        .isNotSameAs(context.getBean("aiRateLimiter", RedisRateLimiter.class));
   }
 
   @Test

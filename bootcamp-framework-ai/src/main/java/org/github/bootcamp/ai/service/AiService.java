@@ -15,7 +15,5 @@ public interface AiService {
 
     Flux<String> chatStream(String message);
 
-    String rag(String question, int topK);
-
     List<Float> embed(String text);
 }

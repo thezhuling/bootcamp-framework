@@ -27,11 +27,11 @@ mvn verify
 
 All modules compile with `maven.compiler.release=25`. No preview features are used, so no `--enable-preview` flag is needed anywhere — do not reintroduce it without an actual preview API to justify it.
 
-Each service module has a `*ApplicationContextTest` that refreshes the full Spring context with Nacos, Redis and RocketMQ switched off or mocked. These are the regression guard for framework upgrades — a moved autoconfiguration class or an ambiguous bean surfaces here rather than at deploy time. Keep them passing.
+Each service module has a `*ApplicationContextTest` that refreshes the full Spring context with Nacos and RocketMQ switched off or mocked. These are the regression guard for framework upgrades — a moved autoconfiguration class or an ambiguous bean surfaces here rather than at deploy time. Keep them passing.
 
 ## Running Services Locally
 
-Infrastructure prerequisites (see `doc/docker/` for setup): **Nacos** (`:8848`), **Redis Stack Server** (`:6379`), **MySQL** (`:3306`), **RocketMQ** (`:9876`), **Sentinel Dashboard** (`:8858`), **OTLP collector** (`:4318`).
+Infrastructure prerequisites (see `doc/docker/` for setup): **Nacos** (`:8848`), **MySQL** (`:3306`), **RocketMQ** (`:9876`), **Sentinel Dashboard** (`:8858`), **OTLP collector** (`:4318`).
 
 Start the auth server first — other services validate JWT against it:
 
@@ -53,21 +53,20 @@ Spring Cloud and Boot versions are coupled: Spring Cloud's compatibility verifie
 
 | Module | Role | Port |
 |--------|------|------|
-| `bootcamp-framework-gateway` | API Gateway (WebFlux/non-blocking) — JWT validation, rate limiting, circuit breaker | 8080 |
-| `bootcamp-framework-microservice` | Core service — REST APIs, Redis caching, RocketMQ consumer | 8080 |
+| `bootcamp-framework-gateway` | API Gateway (WebFlux/non-blocking) — JWT validation, circuit breaker | 8080 |
+| `bootcamp-framework-microservice` | Core service — REST APIs, RocketMQ consumer | 8080 |
 | `bootcamp-framework-producer` | Message producer service, Feign client to microservice | 8081 |
-| `bootcamp-framework-ai` | Spring AI service — Chat, RAG, Embedding, Redis Vector Store | 8082 |
+| `bootcamp-framework-ai` | Spring AI service — Chat, Embedding | 8082 |
 | `bootcamp-framework-auth` | OAuth2 Authorization Server — issues JWT tokens for all services | 9000 |
 | `bootcamp-framework-toolkit` | Shared utility library | — |
 | `bootcamp-framework-dto` | Shared DTOs (no framework dependencies) | — |
 
 ### Key Technology Choices
 
-- **Service Discovery & Config:** Alibaba Nacos (`:8848`) — services register here; dynamic config (Redis credentials, feature toggles) is pushed from Nacos rather than stored in local `application.yml`. Each service uses a dedicated Nacos namespace (UUID placeholder in `application.yml`).
+- **Service Discovery & Config:** Alibaba Nacos (`:8848`) — services register here; dynamic config (feature toggles) is pushed from Nacos rather than stored in local `application.yml`. Each service uses a dedicated Nacos namespace (UUID placeholder in `application.yml`).
 - **Security:** Spring Authorization Server (`bootcamp-framework-auth`) issues JWTs. All downstream services are OAuth2 Resource Servers that validate tokens against the auth server's JWKS endpoint (`http://localhost:9000/oauth2/jwks`). The Gateway forwards tokens downstream via `TokenRelay` filter.
 - **Messaging:** Apache RocketMQ (`:9876`) — producer publishes, microservice consumes.
-- **Caching:** Redis via `redis-om-spring` (ORM-style annotations on entities).
-- **AI:** Spring AI 2.0.1 with OpenAI backend (`OPENAI_API_KEY` env var required). Redis Vector Store (reuses Redis Stack) for RAG. Chat, streaming, embedding, and RAG endpoints in `AiServiceImpl`.
+- **AI:** Spring AI 2.0.1 with OpenAI backend (`OPENAI_API_KEY` env var required). Chat, streaming and embedding endpoints in `AiServiceImpl`.
 - **Inter-service calls:** Spring Cloud OpenFeign with Nacos load balancing.
 - **Circuit breaking:** Alibaba Sentinel + Resilience4j. The Gateway uses reactor-resilience4j for circuit breaking and excludes Sentinel's circuit breaker autoconfiguration in `application.yml` — with both present, Sentinel's factory wins and the gateway's `.circuitBreaker()` filter cannot be created. Sentinel still does flow control there. The gateway's breakers time out after `bootcamp.gateway.circuit-breaker.timeout` (default 5s, set in `GatewayCircuitBreakerConfig`); without it Resilience4j's 1s default silently sends slower healthy calls to `/fallback`. Sentinel dashboard at `:8858`.
 - **Virtual threads:** `spring.threads.virtual.enabled: true` in all services.
@@ -78,8 +77,8 @@ Spring Cloud and Boot versions are coupled: Spring Cloud's compatibility verifie
 
 | Path pattern | Downstream service | Notes |
 |---|---|---|
-| `/api/v1/**` (excl. `/api/v1/ai/**`) | `bootcamp-framework-microservice` | Rate limit 10 req/s, circuit breaker |
-| `/api/v1/ai/**` | `bootcamp-framework-ai` | Rate limit 2 req/s |
+| `/api/v1/**` (excl. `/api/v1/ai/**`) | `bootcamp-framework-microservice` | TokenRelay, circuit breaker |
+| `/api/v1/ai/**` | `bootcamp-framework-ai` | TokenRelay |
 | `/oauth2/**`, `/.well-known/**` | `bootcamp-framework-auth` | No auth required |
 | `/message/**`, `/user/**` | `bootcamp-framework-producer` | TokenRelay |
 
@@ -87,8 +86,8 @@ Spring Cloud and Boot versions are coupled: Spring Cloud's compatibility verifie
 
 ```
 Client → Gateway (WebFlux, JWT validation) → downstream services
-           ├── /api/v1/**   → Microservice (Redis cache, RocketMQ consumer, Feign→Producer)
-           ├── /api/v1/ai/** → AI service (OpenAI, Redis Vector Store, RAG)
+           ├── /api/v1/**   → Microservice (RocketMQ consumer, Feign→Producer)
+           ├── /api/v1/ai/** → AI service (OpenAI chat, embedding)
            ├── /oauth2/**   → Auth server (JWT issuance)
            └── /message/**  → Producer (RocketMQ publisher)
 ```
@@ -106,5 +105,5 @@ Every service permits only `/actuator/health/**`, `/actuator/info` and `/actuato
 ## Docker Deployment
 
 - Microservice `Dockerfile` uses `azul/zulu-openjdk-alpine:25-jre`, exposes port 8080, JVM heap fixed at 256MB. The base image must stay on the same major as `maven.compiler.release`, and the image copies the repackaged jar, so `mvn package` has to have run the `repackage` goal (bound in the root pom).
-- Infrastructure docker-compose/setup scripts are in `doc/docker/` (nacos, redis-stack, mysql subdirectories).
-- Redis password and OpenAI API key: configured via Nacos / environment variables, not hardcoded.
+- Infrastructure docker-compose/setup scripts are in `doc/docker/` (nacos, mysql subdirectories).
+- OpenAI API key: configured via Nacos / environment variables, not hardcoded.

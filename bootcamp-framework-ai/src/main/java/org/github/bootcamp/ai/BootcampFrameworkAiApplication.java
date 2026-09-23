@@ -5,8 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
- * Spring AI service: Chat (sync + streaming), RAG (vector search), Embedding.
- * Reuses the existing Redis Stack as the vector store.
+ * Spring AI service: Chat (sync + streaming), Embedding.
  *
  * @author zhuling
  */

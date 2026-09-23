@@ -59,12 +59,6 @@
             <artifactId>spring-cloud-loadbalancer</artifactId>
         </dependency>
 
-        <!-- Redis Reactive (for Redis-based rate limiting) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
-        </dependency>
-
         <!-- OAuth2 Resource Server — inbound JWT validation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

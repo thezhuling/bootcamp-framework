@@ -31,12 +31,6 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- Redis for RegisteredClient persistence -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-
         <!-- Nacos Service Discovery -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
