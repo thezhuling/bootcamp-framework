@@ -22,8 +22,6 @@
         <spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version>
         <bootcamp-framework.version>0.0.1</bootcamp-framework.version>
         <rocketmq-spring-boot.version>2.3.5</rocketmq-spring-boot.version>
-        <redis-om-spring.version>2.0.4</redis-om-spring.version>
-        <jedis.version>7.4.1</jedis.version>
         <spring-kafka.version>4.1.1</spring-kafka.version>
         <lombok.version>1.18.46</lombok.version>
         <spring-ai.version>2.0.1</spring-ai.version>
@@ -82,18 +80,6 @@
                 <groupId>org.apache.rocketmq</groupId>
                 <artifactId>rocketmq-spring-boot-starter</artifactId>
                 <version>${rocketmq-spring-boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.redis.om</groupId>
-                <artifactId>redis-om-spring</artifactId>
-                <version>${redis-om-spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>redis.clients</groupId>
-                <artifactId>jedis</artifactId>
-                <version>${jedis.version}</version>
             </dependency>
 
             <dependency>
@@ -214,11 +200,6 @@
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>${lombok.version}</version>
-                        </path>
-                        <path>
-                            <groupId>com.redis.om</groupId>
-                            <artifactId>redis-om-spring</artifactId>
-                            <version>${redis-om-spring.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

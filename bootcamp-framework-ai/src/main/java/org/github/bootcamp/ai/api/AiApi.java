@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
 /**
- * AI REST endpoints — Chat (sync + SSE streaming), RAG, Embedding.
+ * AI REST endpoints — Chat (sync + SSE streaming), Embedding.
  * Request/response types use Java records for concise definition.
  *
  * @author zhuling
@@ -22,7 +22,6 @@ public class AiApi {
 
     // Java records as request types (inline — they are small and API-specific)
     record ChatRequest(String message, String sessionId) {}
-    record RagRequest(String question, int topK) {}
     record EmbedRequest(String text) {}
 
     private final AiService aiService;
@@ -41,12 +40,6 @@ public class AiApi {
     @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> chatStream(@RequestBody ChatRequest request) {
         return aiService.chatStream(request.message());
-    }
-
-    /** RAG: retrieve relevant documents then generate a response. */
-    @PostMapping("/rag")
-    public String rag(@RequestBody RagRequest request) {
-        return aiService.rag(request.question(), request.topK());
     }
 
     /** Text embedding — returns the embedding vector. */

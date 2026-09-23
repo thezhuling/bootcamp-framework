@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.ApplicationContext;
 
 /**
- * Loads the OAuth2 authorization server without Nacos or Redis running, and calls its protocol
+ * Loads the OAuth2 authorization server without Nacos running, and calls its protocol
  * endpoints over real HTTP.
  *
  * <p>Refreshing the context alone is not enough here. The authorization server beans all load
@@ -99,7 +99,6 @@ class AuthApplicationContextTest {
 
   @Test
   void onlyProbeAndScrapeActuatorEndpointsAreAnonymous() throws Exception {
-    // Redis is not running here, so health may legitimately report DOWN (503)
     assertThat(get("/actuator/health").statusCode()).isIn(200, 503);
     assertThat(get("/actuator/metrics").statusCode()).isNotEqualTo(200);
   }

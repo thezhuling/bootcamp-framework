@@ -12,7 +12,6 @@ import org.springframework.security.web.SecurityFilterChain;
 
 /**
  * AI and security configuration for the AI service module.
- * RedisVectorStore is auto-configured by Spring AI via spring.ai.vectorstore.redis properties.
  *
  * @author zhuling
  */

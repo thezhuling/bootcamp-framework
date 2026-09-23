@@ -6,7 +6,6 @@ spring:
       enabled: true
   config:
     import:
-      - optional:nacos:application-redis.yml?group=BOOTCAMP-COMMON&refreshEnabled=true
       - optional:nacos:${spring.application.name}.yml?group=BOOTCAMP&refreshEnabled=true
   cloud:
     nacos:

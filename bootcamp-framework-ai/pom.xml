@@ -11,7 +11,7 @@
 
     <artifactId>bootcamp-framework-ai</artifactId>
     <name>bootcamp-framework-ai</name>
-    <description>Spring AI service — Chat, RAG, Embedding with Redis Vector Store</description>
+    <description>Spring AI service — Chat, Embedding</description>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -19,22 +19,6 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-model-openai</artifactId>
-        </dependency>
-
-        <!-- Redis Vector Store (reuses existing Redis Stack).
-             Must be the starter, not the bare spring-ai-redis-store library:
-             only the starter contributes the VectorStore autoconfiguration. -->
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-vector-store-redis</artifactId>
-        </dependency>
-
-        <!-- RedisVectorStoreAutoConfiguration needs a JedisConnectionFactory.
-             Spring Data Redis only creates one when Lettuce is absent, so drop
-             Lettuce from the Redis starter and put Jedis on the classpath. -->
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
         </dependency>
 
         <dependency>
@@ -45,18 +29,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
-        <!-- Redis (reuse existing Redis Stack) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.lettuce</groupId>
-                    <artifactId>lettuce-core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- Nacos Service Discovery -->

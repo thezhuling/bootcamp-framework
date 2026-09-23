@@ -19,7 +19,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 /**
- * Loads the microservice application context without Nacos, RocketMQ or Redis running.
+ * Loads the microservice application context without Nacos or RocketMQ running.
  *
  * <p>This is the guard that catches framework-upgrade breakage: a missing autoconfiguration class
  * or an ambiguous bean shows up here as a failing build rather than as a service that will not boot
@@ -64,7 +64,6 @@ class MicroserviceApplicationContextTest {
 
   @Test
   void onlyProbeAndScrapeActuatorEndpointsAreAnonymous() throws Exception {
-    // Redis is not running here, so health may legitimately report DOWN (503)
     assertThat(send("GET", "/actuator/health")).isIn(200, 503);
     assertThat(send("GET", "/actuator/metrics")).isEqualTo(401);
   }
