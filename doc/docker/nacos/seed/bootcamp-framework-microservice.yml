@@ -1,0 +1,16 @@
+# Bootstrap defaults. Real values go in seed-local/<same name> (git-ignored), which wins.
+server:
+  port: 20000
+  tomcat:
+    mbeanregistry:
+      enabled: true
+    accept-count: 200
+    threads:
+      max: 200
+      min-spare: 100
+
+# NacosConfiguration reads these with no defaults; the service does not start without them.
+microservice:
+  ttl: dev
+  app-key: change-me
+  secret: change-me

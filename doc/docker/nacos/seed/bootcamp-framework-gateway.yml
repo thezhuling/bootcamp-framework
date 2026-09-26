@@ -1,0 +1,4 @@
+bootcamp:
+  gateway:
+    circuit-breaker:
+      timeout: 5s

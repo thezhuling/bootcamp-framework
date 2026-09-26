@@ -43,3 +43,7 @@ build/
 
 node_modules
 
+
+### local Nacos stack: real credentials and config values stay on the machine
+doc/docker/nacos/.env
+doc/docker/nacos/seed-local/

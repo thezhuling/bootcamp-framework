@@ -1,0 +1,75 @@
+# Local Nacos for bootcamp-framework.
+#
+#   docker compose up -d          # start Nacos 3.1.1 + its MySQL
+#   ./init-nacos.sh               # first run only: admin password, namespace, seed configs
+#
+# Server version is pinned to the nacos-client the project resolves through
+# spring-cloud-alibaba-dependencies (3.1.1). Bump both together.
+name: bootcamp-nacos
+
+services:
+  nacos-mysql:
+    image: mysql:8.4
+    container_name: bootcamp-nacos-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: nacos
+      MYSQL_USER: nacos
+      MYSQL_PASSWORD: ${MYSQL_NACOS_PASSWORD}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - nacos-mysql-data:/var/lib/mysql
+      # Runs only when the data volume is empty (first start).
+      - ./mysql-schema.sql:/docker-entrypoint-initdb.d/nacos-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-unacos", "-p${MYSQL_NACOS_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  nacos:
+    image: nacos/nacos-server:v3.1.1-slim
+    container_name: bootcamp-nacos
+    depends_on:
+      nacos-mysql:
+        condition: service_healthy
+    environment:
+      MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: nacos-mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_DB_NAME: nacos
+      MYSQL_SERVICE_USER: nacos
+      MYSQL_SERVICE_PASSWORD: ${MYSQL_NACOS_PASSWORD}
+      MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai
+      # Client API auth on: services log in as nacos/nacos (see application.yml).
+      NACOS_AUTH_ENABLE: "true"
+      NACOS_AUTH_TOKEN: ${NACOS_AUTH_TOKEN}
+      NACOS_AUTH_IDENTITY_KEY: ${NACOS_AUTH_IDENTITY_KEY}
+      NACOS_AUTH_IDENTITY_VALUE: ${NACOS_AUTH_IDENTITY_VALUE}
+      JVM_XMS: 512m
+      JVM_XMX: 512m
+      JVM_XMN: 256m
+      TZ: Asia/Shanghai
+    ports:
+      - "8848:8848"   # HTTP API (server-addr in application.yml)
+      - "9848:9848"   # gRPC, must stay server port + 1000
+      - "8880:8080"   # console UI; 8080 on the host belongs to the gateway
+    volumes:
+      - nacos-logs:/home/nacos/logs
+    healthcheck:
+      # 3.x removed the v1/v2 console health paths (410); readiness lives on the console port.
+      test: ["CMD-SHELL", "curl -fs http://127.0.0.1:8080/v3/console/health/readiness || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 60s
+      retries: 30
+    restart: unless-stopped
+
+volumes:
+  nacos-mysql-data:
+  nacos-logs:
