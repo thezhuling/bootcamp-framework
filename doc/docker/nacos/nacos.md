@@ -46,6 +46,11 @@ docker compose logs -f nacos
 Once seeded, Nacos itself is the source of truth — edit in the console at will; a plain
 `./init-nacos.sh` never overwrites what is there.
 
+`MYSQL_ROOT_PASSWORD` / `MYSQL_NACOS_PASSWORD` are baked into the MySQL volume on first start, so
+`.env` must keep the values the volume was created with; change them only together with
+`docker compose down -v`. Likewise a lost `.env` cannot be rebuilt from `.env.example` against an
+existing volume.
+
 ## What the services expect
 
 Every service registers in namespace **`bootcamp-dev`**, group **`BOOTCAMP`** (see each
