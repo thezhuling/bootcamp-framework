@@ -25,10 +25,10 @@ spring:
       username: nacos
       password: nacos
       discovery:
-        namespace: <gateway-nacos-namespace-uuid>
+        namespace: bootcamp-dev
         group: BOOTCAMP
       config:
-        namespace: <gateway-nacos-namespace-uuid>
+        namespace: bootcamp-dev
         group: BOOTCAMP
         file-extension: yml
     gateway:

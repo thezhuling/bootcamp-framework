@@ -13,11 +13,11 @@ spring:
       username: nacos
       password: nacos
       discovery:
-        namespace: 26b5909e-699a-419a-8ea8-2655c63009a3
+        namespace: bootcamp-dev
         service: ${spring.application.name}
         group: BOOTCAMP
       config:
-        namespace: 26b5909e-699a-419a-8ea8-2655c63009a3
+        namespace: bootcamp-dev
         group: BOOTCAMP
         file-extension: yml
     loadbalancer:

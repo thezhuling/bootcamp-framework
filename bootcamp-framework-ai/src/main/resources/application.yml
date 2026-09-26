@@ -16,10 +16,10 @@ spring:
       username: nacos
       password: nacos
       discovery:
-        namespace: <ai-nacos-namespace-uuid>
+        namespace: bootcamp-dev
         group: BOOTCAMP
       config:
-        namespace: <ai-nacos-namespace-uuid>
+        namespace: bootcamp-dev
         group: BOOTCAMP
         file-extension: yml
     sentinel:

@@ -31,7 +31,7 @@ Each service module has a `*ApplicationContextTest` that refreshes the full Spri
 
 ## Running Services Locally
 
-Infrastructure prerequisites (see `doc/docker/` for setup): **Nacos** (`:8848`), **MySQL** (`:3306`), **RocketMQ** (`:9876`), **Sentinel Dashboard** (`:8858`), **OTLP collector** (`:4318`).
+Infrastructure prerequisites: **Nacos** (`:8848` — in `doc/docker/nacos/`: `cp .env.example .env`, set the token, `docker compose up -d && ./init-nacos.sh`; its MySQL lives inside that stack, no service has a datasource of its own), **RocketMQ** (`:9876`), **Sentinel Dashboard** (`:8858`), **OTLP collector** (`:4318`).
 
 Start the auth server first — other services validate JWT against it:
 
@@ -63,7 +63,7 @@ Spring Cloud and Boot versions are coupled: Spring Cloud's compatibility verifie
 
 ### Key Technology Choices
 
-- **Service Discovery & Config:** Alibaba Nacos (`:8848`) — services register here; dynamic config (feature toggles) is pushed from Nacos rather than stored in local `application.yml`. Each service uses a dedicated Nacos namespace (UUID placeholder in `application.yml`).
+- **Service Discovery & Config:** Alibaba Nacos (`:8848`) — services register here; dynamic config (feature toggles) is pushed from Nacos rather than stored in local `application.yml`. All five services share the `bootcamp-dev` namespace and the `BOOTCAMP` group: Nacos discovery is namespace-scoped, so the gateway's `lb://` routes and the microservice→producer Feign call only resolve when every service registers in the same namespace. Config stays per service through the `<app-name>.yml` dataId; `doc/docker/nacos/seed/` holds what each service expects to find there.
 - **Security:** Spring Authorization Server (`bootcamp-framework-auth`) issues JWTs. All downstream services are OAuth2 Resource Servers that validate tokens against the auth server's JWKS endpoint (`http://localhost:9000/oauth2/jwks`). The Gateway forwards tokens downstream via `TokenRelay` filter.
 - **Messaging:** Apache RocketMQ (`:9876`) — producer publishes, microservice consumes.
 - **AI:** Spring AI 2.0.1 with OpenAI backend (`OPENAI_API_KEY` env var required). Chat, streaming and embedding endpoints in `AiServiceImpl`.
@@ -105,5 +105,5 @@ Every service permits only `/actuator/health/**`, `/actuator/info` and `/actuato
 ## Docker Deployment
 
 - Microservice `Dockerfile` uses `azul/zulu-openjdk-alpine:25-jre`, exposes port 8080, JVM heap fixed at 256MB. The base image must stay on the same major as `maven.compiler.release`, and the image copies the repackaged jar, so `mvn package` has to have run the `repackage` goal (bound in the root pom).
-- Infrastructure docker-compose/setup scripts are in `doc/docker/` (nacos, mysql subdirectories).
+- Local Nacos: `doc/docker/nacos/docker-compose.yml` runs Nacos 3.1.1 (pinned to the nacos-client that `spring-cloud-alibaba-dependencies` resolves — bump both together) with its own MySQL 8.4; `init-nacos.sh` bootstraps the admin user, namespace and `seed/*.yml` configs (git-ignored `seed-local/` overrides carry real values; existing configs are only overwritten with `FORCE=1`). Console at `http://localhost:8880` (8080 on the host belongs to the gateway). `.env` and `seed-local/` are git-ignored — never commit a token or the microservice app-key/secret. `doc/docker/mysql/` is a standalone MySQL recipe unrelated to Nacos.
 - OpenAI API key: configured via Nacos / environment variables, not hardcoded.
