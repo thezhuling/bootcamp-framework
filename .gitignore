@@ -40,7 +40,6 @@ build/
 /idea-dictionary.dic
 .mvn
 
-!**/.DS_Store
 
 node_modules
 
