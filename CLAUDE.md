@@ -31,7 +31,7 @@ Each service module has a `*ApplicationContextTest` that refreshes the full Spri
 
 ## Running Services Locally
 
-Infrastructure prerequisites: **Nacos** (`:8848` — in `doc/docker/nacos/`: `cp .env.example .env`, set the token, `docker compose up -d && ./init-nacos.sh`; its MySQL lives inside that stack, no service has a datasource of its own), **RocketMQ** (`:9876`), **Sentinel Dashboard** (`:8858`), **OTLP collector** (`:4318`).
+Infrastructure prerequisites: **Nacos** (`:8848` — in `doc/docker/nacos/`: `cp .env.example .env`, set the token, `docker compose up -d && ./init-nacos.sh`; its MySQL lives inside that stack, no service has a datasource of its own), **RocketMQ** (`:9876` — `docker compose up -d && ./init-rocketmq.sh` in `doc/docker/rocketmq/`), **Sentinel Dashboard** (`:8858`), **OTLP collector** (`:4318`).
 
 Start the auth server first — other services validate JWT against it:
 
@@ -106,4 +106,5 @@ Every service permits only `/actuator/health/**`, `/actuator/info` and `/actuato
 
 - Microservice `Dockerfile` uses `azul/zulu-openjdk-alpine:25-jre`, exposes port 8080, JVM heap fixed at 256MB. The base image must stay on the same major as `maven.compiler.release`, and the image copies the repackaged jar, so `mvn package` has to have run the `repackage` goal (bound in the root pom).
 - Local Nacos: `doc/docker/nacos/docker-compose.yml` runs Nacos 3.1.1 (pinned to the nacos-client that `spring-cloud-alibaba-dependencies` resolves — bump both together) with its own MySQL 8.4; `init-nacos.sh` bootstraps the admin user, namespace and `seed/*.yml` configs (git-ignored `seed-local/` overrides carry real values; existing configs are only overwritten with `FORCE=1`). Console at `http://localhost:8880` (8080 on the host belongs to the gateway). `.env` and `seed-local/` are git-ignored — never commit a token or the microservice app-key/secret. `doc/docker/mysql/` is a standalone MySQL recipe unrelated to Nacos.
+- Local RocketMQ: `doc/docker/rocketmq/docker-compose.yml` runs RocketMQ 5.3.1 (pinned to the rocketmq-client that `rocketmq-spring-boot-starter` resolves) as nameserver + single broker + dashboard at `http://localhost:8890`; `init-rocketmq.sh` creates `bootcamp-framework-topic` and `bootcamp-producer`. The broker advertises `127.0.0.1:10911`, so only host-side clients can use it, and the dashboard shares the broker's network namespace for that reason. `BootcampFrameworkConsumer` is currently commented out — nothing consumes `bootcamp-framework-topic`.
 - OpenAI API key: configured via Nacos / environment variables, not hardcoded.
