@@ -40,7 +40,15 @@ Send / inspect from the broker container (`mqadmin` is a JVM, ~2 s per call):
 ```shell
 docker compose exec -T broker /home/rocketmq/rocketmq-5.3.1/bin/mqadmin sendMessage -n namesrv:9876 -t bootcamp-framework-topic -p 'hello'
 docker compose exec -T broker /home/rocketmq/rocketmq-5.3.1/bin/mqadmin topicStatus -n namesrv:9876 -t bootcamp-framework-topic
-docker compose exec -T broker /home/rocketmq/rocketmq-5.3.1/bin/mqadmin consumerProgress -n namesrv:9876 -g bootcamp-framework-consumer   # once BootcampFrameworkConsumer is enabled; the group does not exist before
+docker compose exec -T broker /home/rocketmq/rocketmq-5.3.1/bin/mqadmin consumerProgress -n namesrv:9876 -g bootcamp-framework-consumer   # group exists once the microservice has run
+```
+
+End-to-end consume check while the microservice is running:
+
+```shell
+docker compose exec -T broker /home/rocketmq/rocketmq-5.3.1/bin/mqadmin sendMessage -n namesrv:9876 -t bootcamp-framework-topic \
+  -p '{"topic":"bootcamp-framework-topic","body":"hello","timestamp":"2026-01-01T00:00:00Z"}'
+# microservice log: Received [bootcamp-framework-topic] at 2026-01-01T00:00:00Z: hello
 ```
 
 `broker.conf` is bind-mounted from this directory, so keep the checkout the stack was started
@@ -53,7 +61,7 @@ from — or run `docker compose up -d` again from the new location to re-point t
 |---|---|---|
 | microservice | `MessageApi` → `RocketMQTemplate.send` | `bootcamp-framework-topic` |
 | producer | `MessageQueueProducer` → `RocketMQTemplate.send` | `bootcamp-producer` (the value of `rocketmq.producer.customized-trace-topic`, reused as a plain topic; message tracing itself is off — `enableMsgTrace` defaults to false in rocketmq-spring 2.3.5) |
-| microservice | `BootcampFrameworkConsumer` (`bootcamp-framework-consumer`) | `bootcamp-framework-topic` — **currently commented out**, nothing consumes |
+| microservice | `BootcampFrameworkConsumer` (`bootcamp-framework-consumer`) | `bootcamp-framework-topic` — expects a JSON `MessageEvent` (`topic`, `body`, ISO-8601 `timestamp`); anything else is logged as a parse warning and still acknowledged |
 
 `autoCreateTopicEnable=true`, so a send to an unknown topic also works; `init-rocketmq.sh` just
 makes the two topics exist up front (visible in the dashboard before any traffic).
