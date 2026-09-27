@@ -54,8 +54,8 @@ Spring Cloud and Boot versions are coupled: Spring Cloud's compatibility verifie
 | Module | Role | Port |
 |--------|------|------|
 | `bootcamp-framework-gateway` | API Gateway (WebFlux/non-blocking) — JWT validation, circuit breaker | 8080 |
-| `bootcamp-framework-microservice` | Core service — REST APIs, RocketMQ consumer | 8080 |
-| `bootcamp-framework-producer` | Message producer service, Feign client to microservice | 8081 |
+| `bootcamp-framework-microservice` | Core service — REST APIs, RocketMQ consumer | 20000 (from its Nacos config) |
+| `bootcamp-framework-producer` | Message producer service, Feign client to microservice | 8081 (from its Nacos config; Boot's 8080 default would collide with the gateway) |
 | `bootcamp-framework-ai` | Spring AI service — Chat, Embedding | 8082 |
 | `bootcamp-framework-auth` | OAuth2 Authorization Server — issues JWT tokens for all services | 9000 |
 | `bootcamp-framework-toolkit` | Shared utility library | — |

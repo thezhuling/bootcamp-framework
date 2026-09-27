@@ -59,7 +59,7 @@ from — or run `docker compose up -d` again from the new location to re-point t
 
 | Service | Uses | Topic |
 |---|---|---|
-| microservice | `MessageApi` → `RocketMQTemplate.send` | `bootcamp-framework-topic` |
+| microservice | `MessageApi` (`POST /send?message=…`) → `RocketMQTemplate.send` | `bootcamp-framework-topic`, as a JSON `MessageEvent` |
 | producer | `MessageQueueProducer` → `RocketMQTemplate.send` | `bootcamp-producer` (the value of `rocketmq.producer.customized-trace-topic`, reused as a plain topic; message tracing itself is off — `enableMsgTrace` defaults to false in rocketmq-spring 2.3.5) |
 | microservice | `BootcampFrameworkConsumer` (`bootcamp-framework-consumer`) | `bootcamp-framework-topic` — expects a JSON `MessageEvent` (`topic`, `body`, ISO-8601 `timestamp`); anything else is logged as a parse warning and still acknowledged |
 
