@@ -1,0 +1,4 @@
+# The producer has no server.port of its own; without this it starts on Boot's default 8080 and
+# collides with the gateway.
+server:
+  port: 8081

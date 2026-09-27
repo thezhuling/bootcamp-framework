@@ -1,0 +1,86 @@
+# Local RocketMQ for bootcamp-framework.
+#
+#   docker compose up -d          # nameserver + broker + dashboard
+#   ./init-rocketmq.sh            # create the topics the services use (idempotent)
+#
+# Server version is pinned to the rocketmq-client that rocketmq-spring-boot-starter resolves
+# (5.3.1). Same minor, newer patch (5.3.4) is a drop-in tag. The services use the classic
+# remoting protocol, so no proxy is run — and none of the 5.x proxy ports (8080/8081) clash
+# with the gateway/producer.
+name: bootcamp-rocketmq
+
+x-image: &rocketmq-image apache/rocketmq:5.3.1
+
+services:
+  namesrv:
+    image: *rocketmq-image
+    container_name: bootcamp-rocketmq-namesrv
+    command: ["sh", "mqnamesrv"]
+    environment:
+      # runserver.sh appends JAVA_OPT_EXT last, so this overrides its -Xms1g -Xmx1g.
+      JAVA_OPT_EXT: -Xms256m -Xmx256m -Xmn128m
+      TZ: Asia/Shanghai
+    ports:
+      - "9876:9876"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/9876"]
+      interval: 5s
+      timeout: 3s
+      start_period: 10s
+      retries: 20
+    restart: unless-stopped
+
+  # The image runs as uid 3000 and a fresh named volume is root-owned; fix ownership once.
+  broker-init:
+    image: *rocketmq-image
+    user: root
+    entrypoint: ["chown", "-R", "3000:3000", "/home/rocketmq/store"]
+    volumes:
+      - broker-store:/home/rocketmq/store
+
+  broker:
+    image: *rocketmq-image
+    container_name: bootcamp-rocketmq-broker
+    command: ["sh", "mqbroker", "-c", "/home/rocketmq/rocketmq-5.3.1/conf/broker.conf"]
+    depends_on:
+      namesrv:
+        condition: service_healthy
+      broker-init:
+        condition: service_completed_successfully
+    environment:
+      # runbroker.sh defaults to -Xms2g -Xmx2g; JAVA_OPT_EXT is appended last and wins.
+      JAVA_OPT_EXT: -Xms512m -Xmx512m -Xmn256m
+      TZ: Asia/Shanghai
+    volumes:
+      - broker-store:/home/rocketmq/store
+      - ./broker.conf:/home/rocketmq/rocketmq-5.3.1/conf/broker.conf:ro
+    ports:
+      - "10909:10909"   # VIP channel (off by default in 5.x clients, mapped for completeness)
+      - "10911:10911"   # what the broker advertises: brokerIP1=127.0.0.1 in broker.conf
+      - "8890:8082"     # dashboard (listens on 8082) — it shares this container's network namespace, see below
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/10911"]
+      interval: 5s
+      timeout: 3s
+      start_period: 20s
+      retries: 30
+    restart: unless-stopped
+
+  # The broker advertises 127.0.0.1:10911 so the services on the host can reach it through the
+  # published port. A dashboard in its own container would then dial its own loopback and every
+  # broker-stats page would fail, so it runs inside the broker's network namespace instead:
+  # 127.0.0.1:10911 is the broker there and "namesrv" still resolves.
+  dashboard:
+    image: apacherocketmq/rocketmq-dashboard:2.1.0
+    container_name: bootcamp-rocketmq-dashboard
+    network_mode: "service:broker"
+    depends_on:
+      broker:
+        condition: service_healthy
+    environment:
+      JAVA_OPTS: -Drocketmq.namesrv.addr=namesrv:9876 -Xms256m -Xmx256m
+      TZ: Asia/Shanghai
+    restart: unless-stopped
+
+volumes:
+  broker-store:

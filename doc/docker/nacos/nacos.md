@@ -64,6 +64,8 @@ Config is per service through `spring.config.import: optional:nacos:<app-name>.y
   defaults, the service fails to start without them. Also sets `server.port: 20000`. The committed
   seed carries `change-me` placeholders; put the real pair in `seed-local/`.
 - `bootcamp-framework-gateway.yml` — optional, `bootcamp.gateway.circuit-breaker.timeout` (default 5s).
+- `bootcamp-framework-producer.yml` — `server.port: 8081`; the producer has no port of its own and
+  Boot's 8080 default collides with the gateway.
 
 Add a new service's config by dropping `seed/<app-name>.yml` and re-running `init-nacos.sh`.
 
