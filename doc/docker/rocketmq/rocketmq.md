@@ -40,8 +40,12 @@ Send / inspect from the broker container (`mqadmin` is a JVM, ~2 s per call):
 ```shell
 docker compose exec -T broker /home/rocketmq/rocketmq-5.3.1/bin/mqadmin sendMessage -n namesrv:9876 -t bootcamp-framework-topic -p 'hello'
 docker compose exec -T broker /home/rocketmq/rocketmq-5.3.1/bin/mqadmin topicStatus -n namesrv:9876 -t bootcamp-framework-topic
-docker compose exec -T broker /home/rocketmq/rocketmq-5.3.1/bin/mqadmin consumerProgress -n namesrv:9876 -g bootcamp-framework-consumer
+docker compose exec -T broker /home/rocketmq/rocketmq-5.3.1/bin/mqadmin consumerProgress -n namesrv:9876 -g bootcamp-framework-consumer   # once BootcampFrameworkConsumer is enabled; the group does not exist before
 ```
+
+`broker.conf` is bind-mounted from this directory, so keep the checkout the stack was started
+from — or run `docker compose up -d` again from the new location to re-point the mount (the
+`broker-store` volume, topics and messages survive that).
 
 ## What the services expect
 
