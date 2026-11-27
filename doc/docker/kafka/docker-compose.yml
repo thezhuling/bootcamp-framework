@@ -1,0 +1,77 @@
+# Local Kafka for bootcamp-framework.
+#
+#   docker compose up -d --wait   # one KRaft node (broker + controller in one process) + kafka-ui
+#   ./init-kafka.sh               # create the topic the services will use (idempotent)
+#
+# Replication, ISR, acks=all and leader failover need three replicas: use
+# docker-compose.cluster.yml for those. Both files publish 9092 and 8895, so run one at a time.
+#
+# Server 4.3.1 is the newest feature release. The services' client comes from Spring Boot's
+# dependency management (spring-kafka 4.1.1 -> kafka-clients 4.2.1); a 4.2 client talks to a
+# 4.3 broker without any setting.
+name: bootcamp-kafka
+
+services:
+  kafka:
+    image: apache/kafka:4.3.1
+    container_name: bootcamp-kafka
+    hostname: kafka
+    environment:
+      # Setting any KAFKA_* variable makes the image build server.properties from the
+      # environment alone (KAFKA_FOO_BAR -> foo.bar), so everything a KRaft node needs is listed.
+      CLUSTER_ID: BmHIAltVQ6KEbGCif5iBsg
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      # Two client listeners: HOST is what Java processes on the Mac use (127.0.0.1:9092 through
+      # the published port); INTERNAL is what kafka-ui and the CLI tools inside the network use.
+      # A client is always handed the advertised address of the listener it bootstrapped on.
+      KAFKA_LISTENERS: INTERNAL://:19092,CONTROLLER://:9093,HOST://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,HOST://127.0.0.1:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,HOST:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      # One node: internal topics can only have one replica (the defaults of 3 would never become
+      # available, and consumer groups, transactions and share groups would hang).
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR: 1
+      KAFKA_NUM_PARTITIONS: 3
+      # Local conveniences, not production values: no 3 s wait before the first rebalance, and
+      # retention is enforced every 30 s instead of every 5 min so deletes are observable.
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 30000
+      KAFKA_HEAP_OPTS: -Xms512m -Xmx512m
+      TZ: Asia/Shanghai
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "KAFKA_HEAP_OPTS=-Xmx64m /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server kafka:19092 >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 20s
+      start_period: 20s
+      retries: 12
+    restart: unless-stopped
+
+  kafka-ui:
+    image: kafbat/kafka-ui:v1.5.0
+    container_name: bootcamp-kafka-ui
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_CLUSTERS_0_NAME: bootcamp-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:19092
+      JAVA_OPTS: -Xms128m -Xmx256m
+      TZ: Asia/Shanghai
+    ports:
+      - "8895:8080"
+    restart: unless-stopped
+
+volumes:
+  kafka-data:
